@@ -1,0 +1,4 @@
+<?php
+
+require_once __DIR__.'/../likephp/LikePHP.php';
+\likephp\LikePHP::getInstance()->run();
