@@ -31,23 +31,35 @@ class LikePHP
 
     private function checkEnv()
     {
-        //校验php版本
+        //1.校验php版本
         $php_version_limit = '7.0.0';
         if (version_compare(PHP_VERSION, $php_version_limit, '<')) {
             Console::getInstance()->error('php版本(' . PHP_VERSION . ')必须大于' . $php_version_limit);
             die();
         }
-        $swoole_version_limit = '2.0.0';
+        //2.校验运行模式
         if (php_sapi_name() != 'cli') {
             Console::getInstance()->error('server必须在CLI模式下运行');
             die();
         }
-        //2.校验swoole扩展
+        //3.校验swoole扩展
         if (!extension_loaded('swoole')) {
             Console::getInstance()->error('swoole扩展未安装');
             die();
         }
-        //3.校验swoole版本
+        //4.校验sockets扩展
+        if (!extension_loaded('sockets')) {
+            Console::getInstance()->error('sockets扩展未安装');
+            die();
+        }
+        //5.校验swoole版本
+        $swoole_version_limit = '2.0.0';
+        $swoole_version = swoole_version();
+        if (version_compare($swoole_version, $swoole_version_limit, '<')) {
+            Console::getInstance()->error('swoole版本(' . $swoole_version . ')必须大于' . $swoole_version_limit);
+            die();
+        }
+        //6.校验swoole版本
         $swoole_version = swoole_version();
         if (version_compare($swoole_version, $swoole_version_limit, '<')) {
             Console::getInstance()->error('swoole版本(' . $swoole_version . ')必须大于' . $swoole_version_limit);
@@ -161,6 +173,10 @@ class LikePHP
         ];
         $app_config['server']['setting'] = array_merge($default_setting, $app_config['server']['setting']);
         $server_config = $app_config['server'];
+        if ($this->checkPort($server_config['host'], $server_config['port'])) {
+            Console::getInstance()->error('应用' . $app_name . '配置的端口' . $server_config['host'] . ':' . $server_config['port'] . '被占用');
+            die();
+        }
         $callback_name = '\\likephp\\event\\' . ucfirst($server_config['type']) . 'Event';
         Server::getInstance()->run($server_config, $callback_name);
     }
@@ -221,5 +237,21 @@ class LikePHP
         $pid_file = $pid_dir . $app_name . '.pid';
         $pid = @file_get_contents($pid_file);
         return $pid;
+    }
+
+    /**
+     * @param $host
+     * @param $port
+     * @return bool true:被占用||false:未被占用
+     */
+    private function checkPort($host, $port)
+    {
+        $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        socket_set_nonblock($sock);
+        socket_connect($sock, $host, $port);
+        socket_set_block($sock);
+        $status = @socket_select($r = array($sock), $w = array($sock), $f = array($sock), 1);
+        $check_result = $status == 1 ? true : false;
+        return $check_result;
     }
 }
