@@ -8,11 +8,12 @@
 
 namespace likephp\event;
 
+use likephp\App;
 
-abstract class HttpEvent extends BaseEvent
+class HttpEvent extends BaseEvent
 {
     public function onRequest(\swoole_http_request $request, \swoole_http_response $response)
     {
-        $response->end('asdwwwwww');
+        App::getInstance()->httpRun($request, $response);
     }
 }

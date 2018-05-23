@@ -123,7 +123,8 @@ class LikePHP
         if (!in_array($act_name, $allow_act_list) || !in_array($app_name, $allow_app_list)) {
             $this->serverHelp($allow_act_list, $allow_app_list);
         }
-        call_user_func_array([$this, 'server' . ucfirst($act_name)], [$app_name]);
+        define('APP_NAME', $app_name);
+        call_user_func([$this, 'server' . ucfirst($act_name)]);
     }
 
     private function getAllowAppList()
@@ -157,33 +158,33 @@ class LikePHP
         die();
     }
 
-    private function serverStart($app_name)
+    private function serverStart()
     {
-        $pid = $this->getServerPid($app_name);
+        $pid = $this->getServerPid();
         if ($pid && \swoole_process::kill($pid, 0)) {
             Console::getInstance()->warn('LikePHP服务已开启');
             die();
         }
         Console::getInstance()->info('LikePHP服务正在开启...');
-        $app_config = $this->loadAppConfig($app_name);
+        $app_config = $this->loadAppConfig();
         $default_setting = [
             'daemonize' => 1,//守护进程
-            'log_file' => TMP_PATH . 'server' . DIRECTORY_SEPARATOR . $app_name . '.log',
-            'pid_file' => TMP_PATH . 'server' . DIRECTORY_SEPARATOR . $app_name . '.pid',
+            'log_file' => TMP_PATH . 'server' . DIRECTORY_SEPARATOR . APP_NAME . '.log',
+            'pid_file' => TMP_PATH . 'server' . DIRECTORY_SEPARATOR . APP_NAME . '.pid',
         ];
         $app_config['server']['setting'] = array_merge($default_setting, $app_config['server']['setting']);
         $server_config = $app_config['server'];
         if ($this->checkPort($server_config['host'], $server_config['port'])) {
-            Console::getInstance()->error('应用' . $app_name . '配置的端口' . $server_config['host'] . ':' . $server_config['port'] . '被占用');
+            Console::getInstance()->error('应用' . APP_NAME . '配置的端口' . $server_config['host'] . ':' . $server_config['port'] . '被占用');
             die();
         }
         $callback_name = '\\likephp\\event\\' . ucfirst($server_config['type']) . 'Event';
         Server::getInstance()->run($server_config, $callback_name);
     }
 
-    private function serverStop($app_name)
+    private function serverStop()
     {
-        $pid = $this->getServerPid($app_name);
+        $pid = $this->getServerPid();
         if ($pid) {
             Console::getInstance()->info('LikePHP服务关闭中...');
             if (\swoole_process::kill($pid, 0)) {
@@ -196,9 +197,9 @@ class LikePHP
         die();
     }
 
-    private function serverStatus($app_name)
+    private function serverStatus()
     {
-        $pid = $this->getServerPid($app_name);
+        $pid = $this->getServerPid();
         if ($pid && \swoole_process::kill($pid, 0)) {
             Console::getInstance()->info('LikePHP服务运行中！');
             die();
@@ -207,9 +208,9 @@ class LikePHP
         die();
     }
 
-    private function serverRestart($app_name)
+    private function serverRestart()
     {
-        $pid = $this->getServerPid($app_name);
+        $pid = $this->getServerPid();
         if ($pid) {
             if (\swoole_process::kill($pid, 0)) {
                 \swoole_process::kill($pid, 15);
@@ -217,24 +218,24 @@ class LikePHP
             Console::getInstance()->info('LikePHP服务关闭成功');
         }
         sleep(1);
-        $this->serverStart($app_name);
+        $this->serverStart();
     }
 
-    private function loadAppConfig($app_name)
+    private function loadAppConfig()
     {
-        $config_file = CONF_PATH . $app_name . '.php';
+        $config_file = CONF_PATH . APP_NAME . '.php';
         $config = require_once $config_file;
         Config::getInstance()->set($config);
         return $config;
     }
 
-    private function getServerPid($app_name)
+    private function getServerPid()
     {
         $pid_dir = TMP_PATH . 'server' . DIRECTORY_SEPARATOR;
         if (!is_dir($pid_dir)) {
             mkdir($pid_dir, 0777, true);
         }
-        $pid_file = $pid_dir . $app_name . '.pid';
+        $pid_file = $pid_dir . APP_NAME . '.pid';
         $pid = @file_get_contents($pid_file);
         return $pid;
     }

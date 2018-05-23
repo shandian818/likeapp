@@ -8,7 +8,6 @@
 
 namespace likephp\event;
 
-
 use likephp\Console;
 
 class BaseEvent
@@ -16,5 +15,10 @@ class BaseEvent
     public function onStart()
     {
         Console::getInstance()->info('LikePHP服务开启成功');
+    }
+
+    public function onWorkerStart()
+    {
+        Console::getInstance()->info('onWorkerStart');
     }
 }

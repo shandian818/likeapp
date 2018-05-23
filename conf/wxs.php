@@ -18,5 +18,20 @@ return [
             'enable_static_handler' => true,
             'document_root' => WEB_PATH,
         ]
+    ],
+    'router' => [
+        'GET' => [
+            '/' => 'Index@index',
+            '/login' => 'Public@login',
+        ],
+        'POST' => [
+            '/doLogin' => 'Public@doLogin',
+        ],
+        'PUT' => [
+            '/' => 'Index@index',
+        ],
+        'DELETE' => [
+            '/' => 'Index@index',
+        ]
     ]
 ];

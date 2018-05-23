@@ -33,7 +33,7 @@ class Server
                 $this->server = new \swoole_http_server($config['host'], $config['port'], $config['mode'], $config['sock_type']);
                 $event_list = [
                     'Start',
-                    'ManagerStart',
+                    'WorkerStart',
                     'Request'
                 ];
                 break;

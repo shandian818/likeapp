@@ -11,5 +11,8 @@ namespace apps\wxs\ctrl;
 
 class Index
 {
-
+    public function index()
+    {
+        echo 'Index-index';
+    }
 }
