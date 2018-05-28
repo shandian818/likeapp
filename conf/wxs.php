@@ -33,5 +33,9 @@ return [
         'DELETE' => [
             '/' => 'Index@index',
         ]
+    ],
+    'app' => [
+        'default_ctrl' => 'index',
+        'default_act' => 'index',
     ]
 ];
