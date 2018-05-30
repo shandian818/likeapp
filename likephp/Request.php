@@ -27,15 +27,19 @@ class Request
     private $cookie;
     private $rawContent;
 
-    public static function getInstance(\swoole_http_request $request)
+    public static function getInstance()
     {
         if (!self::$instance instanceof self) {
-            self::$instance = new static($request);
+            self::$instance = new static;
         }
         return self::$instance;
     }
 
-    private function __construct(\swoole_http_request $request)
+    private function __construct()
+    {
+    }
+
+    public function parseHttp(\swoole_http_request $request)
     {
         $this->swoole_http_request = $request;
         $this->get = isset($request->get) ? $request->get : [];
