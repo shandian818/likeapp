@@ -25,7 +25,7 @@ class Router
     {
     }
 
-    public function http()
+    public function routeHttp()
     {
 
     }

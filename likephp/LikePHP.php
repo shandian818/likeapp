@@ -134,8 +134,9 @@ class LikePHP
         $files = array_diff($files, ['.', '..']);
         if (!empty($files)) {
             foreach ($files as $file) {
-                if (false !== strpos($file, '.php')) {
-                    $app_name = strtolower(basename($file, '.php'));
+                $path = CONF_PATH . DIRECTORY_SEPARATOR . $file;
+                if (is_dir($path)) {
+                    $app_name = strtolower($file);
                     $app_list[] = $app_name;
                 }
             }
@@ -223,8 +224,20 @@ class LikePHP
 
     private function loadAppConfig()
     {
-        $config_file = CONF_PATH . APP_NAME . '.php';
-        $config = require_once $config_file;
+        $config = [];
+        $dir = CONF_PATH . APP_NAME;
+        $files = scandir($dir);
+        $files = array_diff($files, ['.', '..']);
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                $path = $dir . DIRECTORY_SEPARATOR . $file;
+                if (false !== strpos($file, '.php')) {
+                    $file_config = require_once $path;
+                    $config_item = strtolower(basename($file));
+                    $config[$config_item] = $file_config;
+                }
+            }
+        }
         Config::getInstance()->set($config);
         return $config;
     }
