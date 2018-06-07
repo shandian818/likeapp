@@ -27,6 +27,13 @@ class Router
 
     public function routeHttp()
     {
-
+        $router = Config::getInstance()->get('router');
+        $depr = Config::getInstance()->get('app.url_pathinfo_depr');
+        $url_ext = Config::getInstance()->get('app.url_ext');
+        $path_info = Request::getInstance()->pathinfo;
+        $uri = preg_replace('/' . $url_ext . '$/i', '', trim($path_info, $depr));
+        if ('/' != $depr) {
+            $uri = str_replace($depr, '/', $uri);
+        }
     }
 }
