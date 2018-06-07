@@ -7,6 +7,8 @@
  */
 
 return [
-        'default_ctrl' => 'index',
-        'default_act' => 'index',
+    'default_ctrl' => 'index',
+    'default_act' => 'index',
+    'url_pathinfo_depr' => '/',
+    'url_ext' => '.html',
 ];
