@@ -25,10 +25,13 @@ class LikePHP
     {
         $this->checkEnv();
         $this->initPath();
-        $this->loadFunc();
         $this->registerAutoLoad();
+        $this->loadFunc();
     }
 
+    /**
+     * 校验环境
+     */
     private function checkEnv()
     {
         //1.校验php版本
@@ -67,6 +70,9 @@ class LikePHP
         }
     }
 
+    /**
+     * 初始化路径
+     */
     private function initPath()
     {
         defined('LIKE_PATH') or define('LIKE_PATH', __DIR__ . DIRECTORY_SEPARATOR);
@@ -78,6 +84,10 @@ class LikePHP
         defined('WEB_PATH') or define('WEB_PATH', ROOT_PATH . 'web' . DIRECTORY_SEPARATOR);
     }
 
+    /**
+     * 载入公共函数
+     * @param string $dir
+     */
     private function loadFunc($dir = '')
     {
         $dir = rtrim($dir ?: FUNC_PATH, DIRECTORY_SEPARATOR);
@@ -113,6 +123,9 @@ class LikePHP
         }
     }
 
+    /**
+     * 框架启动
+     */
     public function run()
     {
         global $argv;
@@ -127,6 +140,10 @@ class LikePHP
         call_user_func([$this, 'server' . ucfirst($act_name)]);
     }
 
+    /**
+     * 获取支持的应用列表
+     * @return array
+     */
     private function getAllowAppList()
     {
         $app_list = [];
@@ -144,6 +161,11 @@ class LikePHP
         return $app_list;
     }
 
+    /**
+     * 服务帮助
+     * @param $allow_act_list 支持的命令
+     * @param $allow_app_list 支持的应用
+     */
     private function serverHelp($allow_act_list, $allow_app_list)
     {
         $help_string = '' . PHP_EOL;
@@ -159,6 +181,9 @@ class LikePHP
         die();
     }
 
+    /**
+     * 服务开启
+     */
     private function serverStart()
     {
         $pid = $this->getServerPid();
@@ -183,6 +208,9 @@ class LikePHP
         Server::getInstance()->run($server_config, $callback_name);
     }
 
+    /**
+     * 服务停止
+     */
     private function serverStop()
     {
         $pid = $this->getServerPid();
@@ -198,6 +226,9 @@ class LikePHP
         die();
     }
 
+    /**
+     * 服务状态
+     */
     private function serverStatus()
     {
         $pid = $this->getServerPid();
@@ -209,6 +240,9 @@ class LikePHP
         die();
     }
 
+    /**
+     * 服务重启
+     */
     private function serverRestart()
     {
         $pid = $this->getServerPid();
@@ -222,6 +256,10 @@ class LikePHP
         $this->serverStart();
     }
 
+    /**
+     * 载入应用的配置
+     * @return array
+     */
     private function loadAppConfig()
     {
         $config = [];
@@ -242,6 +280,10 @@ class LikePHP
         return $config;
     }
 
+    /**
+     * 获取服务进程pid
+     * @return bool|string
+     */
     private function getServerPid()
     {
         $pid_dir = TMP_PATH . 'server' . DIRECTORY_SEPARATOR;
