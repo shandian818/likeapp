@@ -64,6 +64,11 @@ class Request
         return $value;
     }
 
+    public function mergeGet($var = [])
+    {
+        return array_merge($this->get, $var);
+    }
+
     public function post($key = null, $default_value = null)
     {
         if (!empty($key)) {
@@ -83,4 +88,6 @@ class Request
         }
         return $value;
     }
+
+
 }

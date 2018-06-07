@@ -1,4 +1,93 @@
 <?php
 
-require_once __DIR__.'/../likephp/LikePHP.php';
-\likephp\LikePHP::getInstance()->run();
+//require_once __DIR__.'/../likephp/LikePHP.php';
+//\likephp\LikePHP::getInstance()->run();
+
+
+$routers = [
+
+    'GET' => [
+        '/' => 'Index@index',
+        '/login' => 'Public@login',
+        '/a/b/c/d' => 'Public@login',
+        '/news/:id' => 'Public@login',
+    ],
+    'POST' => [
+        '/doLogin' => 'Public@doLogin',
+    ],
+    'PUT' => [
+        '/' => 'Index@index',
+    ],
+    'DELETE' => [
+        '/' => 'Index@index',
+    ]
+
+];
+$depr = '/';
+$url_ext = '.html';
+$path_info = '/a/b/c/d.html';
+$path_info = '/news/987.html';
+$method = 'GET';
+$uri = preg_replace('/' . $url_ext . '$/i', '', trim($path_info, $depr));
+if ('/' != $depr) {
+    $uri = str_replace($depr, '/', $uri);
+}
+
+if (!isset($routers[$method]) || !is_array($routers[$method]) || empty($routers[$method]) || !$match_result = matchRouter($uri, $routers[$method])) {
+    //如果没配置路由||路由不是数组||路由为空||未匹配到路由规则===智能自动路由
+    print 123;
+} else {
+    //走匹配到的路由
+    print_r($match_result);
+}
+
+
+function matchRouter($uri, $router)
+{
+    $var = [];
+    foreach ($router as $rule => $value) {
+        $rule = trim($rule, '/');
+        if ($rule === $uri) {
+            //完全匹配-静态路由
+            echo '静态路由';
+            return true;
+        } else {
+            //动态路由
+            $rule_array = explode('/', $rule);
+            $uri_array = explode('/', $uri);
+            foreach ($rule_array as $key => $val) {
+                //可选参数
+                if (0 === strpos($val, '[:')) {
+                    $val = substr($val, 1, -1);
+                }
+                //变量
+                if (':' == substr($val, 0, 1)) {
+                    //变量使用函数
+                    if ($pos = strpos($val, '|')) {
+                        $val = substr($val, 1, $pos - 1);
+                    }
+                    if (strpos($val, '\\')) {
+                        //数字类型
+                        $type = substr($val, -1);
+                        if ('d' == $type) {
+                            if (isset($uri_array[$key]) && !is_numeric($uri_array[$key])) {
+                                return false;
+                            }
+                        }
+                        $name = substr($val, 1, -2);
+                    } elseif ($pos = strpos($val, '^')) {
+                        $array = explode('-', substr(strstr($val, '^'), 1));
+                        if (in_array($uri_array[$key], $array)) {
+                            return false;
+                        }
+                        $name = substr($val, 1, $pos - 1);
+                    } else {
+                        $name = substr($val, 1);
+                    }
+                    $var[$name] = isset($uri_array[$key]) ? $uri_array[$key] : '';
+                }
+            }
+        }
+    }
+    return $var;
+}
